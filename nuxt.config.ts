@@ -4,4 +4,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxt/ui"],
   css: ["~/assets/css/main.css"],
+  runtimeConfig: {
+    public: {
+      maxChartPoints: 40,
+    },
+  },
 });

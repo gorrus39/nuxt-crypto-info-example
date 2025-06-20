@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ClientOnly } from "#components";
 import { useDimention } from "#imports";
-import { Chart, Grid, Line } from "vue3-charts";
+import { Chart, Grid, Line, Tooltip } from "vue3-charts";
 import type { Point } from "~/types";
 
 const dimention = useDimention();
@@ -15,13 +15,13 @@ const width = computed(() => {
 const axis = ref({
   primary: {
     type: "band",
-    format: (val: string) => (val === "Feb" ? "😜" : val),
+    // format: (val: string) => (val === "Feb" ? "😜" : val),
     rotate: true,
+    domain: ["dataMin", "dataMax + 100"],
   },
   secondary: {
-    domain: ["dataMin", "dataMax + 100"],
-    type: "linear",
-    ticks: 8,
+    // type: "linear",
+    // ticks: 8,
   },
 });
 </script>
@@ -32,11 +32,20 @@ const axis = ref({
       :axis
       :size="{ width, height: 220 }"
       :data
-      :margin="{ top: 40, left: 20 }"
+      :margin="{ top: 10, left: 20, right: 0, bottom: 0 }"
     >
       <template #layers>
         <Grid strokeDasharray="2,2" />
         <Line :dataKeys="['dateString', 'value']" />
+      </template>
+      <template #widgets>
+        <Tooltip
+          borderColor="#48CAE4"
+          :config="{
+            dateString: { label: 'date', color: 'green' },
+            value: { color: '#0077b6' },
+          }"
+        />
       </template>
     </Chart>
   </client-only>
