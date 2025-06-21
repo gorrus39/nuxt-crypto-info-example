@@ -115,7 +115,6 @@ const filterByDateRange = <T extends PriceHistoryRecord = PriceHistoryRecord>({
   dateRange: DateRange;
 }): T[] => {
   if (dateRange === null) return items;
-  const filtered: T[] = [];
 
   const startDate = new Date(dateRange.start);
   const endDate = new Date(dateRange.end);
@@ -129,10 +128,19 @@ const filterByDateRange = <T extends PriceHistoryRecord = PriceHistoryRecord>({
 async function sleep(milliseconds: number) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
+
+const pipeFilter = <T extends { [key: string]: any }[]>(
+  value: T,
+  ...fns: ((arg: T) => T)[]
+): T => {
+  return fns.reduce((acc, fn) => fn(acc), value);
+};
+
 export {
   dateFormatter,
   filterByMaxElements,
   filterByDateRange,
   getFormattedRemoteItems,
   sleep,
+  pipeFilter,
 };

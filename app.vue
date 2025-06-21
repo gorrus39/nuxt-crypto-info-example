@@ -11,6 +11,7 @@ import { dateFormatter } from "#imports";
 import { UContainer } from "#components";
 import { currencySourceSchema } from "./schemas";
 import type { TabsItem } from "@nuxt/ui";
+import { pipeFilter } from "./utils";
 const config = useRuntimeConfig();
 
 const currencySources: TabsItem[] = currencySourceSchema.options.map(
@@ -23,16 +24,13 @@ const requesting = ref<Requesting>(false);
 const dateRange = ref<DateRange>(null);
 
 const formattedData = computed<Point[]>(() => {
-  let items = data.value;
+  const filteredItems = pipeFilter(
+    data.value,
+    (items) => filterByDateRange({ items, dateRange: dateRange.value }),
+    (items) => filterByMaxElements({ items, max: config.public.maxChartPoints })
+  );
 
-  items = filterByDateRange({ items, dateRange: dateRange.value });
-
-  items = filterByMaxElements({
-    items,
-    max: config.public.maxChartPoints,
-  });
-
-  return items.map((item) => ({
+  return filteredItems.map((item) => ({
     dateString: dateFormatter(new Date(item.targetDate)),
     value: parseFloat(item.price),
   }));
