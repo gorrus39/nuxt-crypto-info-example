@@ -1,46 +1,82 @@
 <script setup lang="ts">
 import Chart from "~/components/chart.vue";
-import type { Point, ResponseCoingeco } from "./types";
-import { data } from "~/data/coingeco";
-import z from "zod";
+import type {
+  CurrencySource,
+  DateRange,
+  Point,
+  PriceHistoryRecord,
+  Requesting,
+} from "./types";
 import { dateFormatter } from "#imports";
+import { UContainer } from "#components";
+import { currencySourceSchema } from "./schemas";
+import type { TabsItem } from "@nuxt/ui";
 const config = useRuntimeConfig();
 
-const schema = z.object({
-  prices: z.array(z.tuple([z.number(), z.number()])),
+const currencySources: TabsItem[] = currencySourceSchema.options.map(
+  (source) => ({ value: source, label: source })
+);
+const selectedCurrencySource = ref(currencySources[0].value as CurrencySource);
+
+const data = ref<PriceHistoryRecord[]>([]);
+const requesting = ref<Requesting>(false);
+const dateRange = ref<DateRange>(null);
+
+const formattedData = computed<Point[]>(() => {
+  let items = data.value;
+
+  items = filterByDateRange({ items, dateRange: dateRange.value });
+
+  items = filterByMaxElements({
+    items,
+    max: config.public.maxChartPoints,
+  });
+
+  return items.map((item) => ({
+    dateString: dateFormatter(new Date(item.targetDate)),
+    value: parseFloat(item.price),
+  }));
 });
 
-const { error, data: parsedData } = schema.safeParse(data);
-
-const arr: Point[] = [];
-if (parsedData) {
-  for (const item of parsedData.prices) {
-    arr.push({ dateString: dateFormatter(new Date(item[0])), value: item[1] });
-  }
-}
-const filterToMaxElements = <T>({
-  array,
-  max,
-}: {
-  array: T[];
-  max: number;
-}): T[] => {
-  if (array.length < max) return array;
-
-  const filteredArray = array.filter((_, index) => index % 2 === 0);
-  return filterToMaxElements({ array: filteredArray, max });
-};
-
-const filtered = filterToMaxElements({
-  array: arr,
-  max: config.public.maxChartPoints,
+watch(selectedCurrencySource, () => {
+  data.value = [];
 });
 </script>
 
 <template>
-  <h1>asd</h1>
-  <div v-if="error">{{ error }}</div>
-  <div>
-    <chart :data="filtered" />
-  </div>
+  <UApp>
+    <UToaster />
+
+    <UContainer class="p-2">
+      <UTabs :items="currencySources" v-model="selectedCurrencySource" />
+
+      <div class="flex gap-2 items-center">
+        <button-get-items
+          v-model:data="data"
+          v-model:requesting="requesting"
+          :currencySource="selectedCurrencySource"
+        />
+        <button-post-items
+          v-if="data.length === 0"
+          v-model:data="data"
+          v-model:requesting="requesting"
+          :currencySource="selectedCurrencySource"
+        />
+        <button-delete-items
+          v-else
+          v-model:data="data"
+          v-model:requesting="requesting"
+          :currencySource="selectedCurrencySource"
+        />
+        <date-range-picker
+          v-if="data.length > 0"
+          :min-date-string="data[0].targetDate"
+          :max-date-string="data[data.length - 1].targetDate"
+          v-model="dateRange"
+        />
+      </div>
+
+      <chart :data="formattedData" />
+    </UContainer>
+  </UApp>
 </template>

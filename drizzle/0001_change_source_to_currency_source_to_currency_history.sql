@@ -1,0 +1,1 @@
+ALTER TABLE "price_history" RENAME COLUMN "source" TO "currency_source";

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1750431414323,
+      "tag": "0000_careful_banshee",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1750447114795,
+      "tag": "0001_change_source_to_currency_source_to_currency_history",
+      "breakpoints": true
+    }
+  ]
+}
