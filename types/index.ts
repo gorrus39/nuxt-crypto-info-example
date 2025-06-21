@@ -15,8 +15,20 @@ export type Point = {
   dateString: DateString;
   value: USDPrice;
 };
+
+export interface PriceHistoryProvider {
+  getItems(): Promise<{ error?: string; items?: PriceHistoryRecord[] }>;
+  fetchRemoteItems(): Promise<{ error?: string; items?: PriceHistoryRecord[] }>;
+  deleteItems(): Promise<{ error?: string }>;
+}
+
 export type Requesting = "GET" | "POST" | "DELETE" | false;
 export type DateRange = { start: string; end: string } | null;
+
+export type PriceHistoryApiResponse = {
+  error?: string;
+  items?: PriceHistoryRecord[];
+};
 
 export type ResponseCoingeco = z.infer<typeof responseCoingeckoSchema>;
 export type ResponseKraken = z.infer<typeof responseKrakenSchema>;

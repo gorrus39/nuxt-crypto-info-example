@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { CurrencySource, PriceHistoryRecord, Requesting } from "~/types";
+import type {
+  CurrencySource,
+  PriceHistoryApiResponse,
+  PriceHistoryRecord,
+  Requesting,
+} from "~/types";
 const toast = useToast();
 
 const data = defineModel<PriceHistoryRecord[]>("data", { required: true });
@@ -9,11 +14,8 @@ const props = defineProps<{ currencySource: CurrencySource }>();
 async function getData() {
   requesting.value = "GET";
 
-  const { error, data: backendData } = await $fetch(
-    "/api/price-history/items",
-    {
-      params: { currencySource: props.currencySource },
-    }
+  const { error, items: backendData } = await $fetch<PriceHistoryApiResponse>(
+    `/api/history/${props.currencySource}`
   );
   if (error) {
     toast.add({ title: `Unsuccessfully! ${error}`, color: "error" });
